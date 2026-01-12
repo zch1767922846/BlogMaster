@@ -1,0 +1,84 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+<div class="layui-fluid" style="margin:10px 0px">
+    <div class="layui-row layui-col-space20">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <form class="layui-form" action="/admin/user" method="post">
+                        {{ user_form.hidden_tag() }}
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">用户名</label>
+                            <div class="layui-input-block">
+                                {{ user_form.username(class="layui-input", placeholder="请输入用户名") }}
+                                {% if user_form.username.errors %}
+                                <div class="layui-form-mid layui-text-danger">{{ user_form.username.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">昵称</label>
+                            <div class="layui-input-block">
+                                {{ user_form.nickname(class="layui-input", placeholder="请输入昵称") }}
+                                {% if user_form.nickname.errors %}
+                                <div class="layui-form-mid layui-text-danger">{{ user_form.nickname.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">密码</label>
+                            <div class="layui-input-block">
+                                {{ user_form.password(class="layui-input", placeholder="请输入密码") }}
+                                {% if user_form.password.errors %}
+                                <div class="layui-form-mid layui-text-danger">{{ user_form.password.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">邮箱</label>
+                            <div class="layui-input-block">
+                                {{ user_form.email(class="layui-input", placeholder="请输入邮箱") }}
+                                {% if user_form.email.errors %}
+                                <div class="layui-form-mid layui-text-danger">{{ user_form.email.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">状态</label>
+                            <div class="layui-input-block">
+                                <input type="radio" name="status" value="1" title="启用" checked>
+                                <input type="radio" name="status" value="0" title="禁用">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                {{ user_form.submit(class="layui-btn", value="提交") }}
+                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+layui.use('form', function(){
+    var form = layui.form;
+    // 表单渲染
+    form.render();
+});
+</script>
+{% endblock %}

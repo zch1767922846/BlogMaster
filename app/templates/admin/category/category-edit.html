@@ -1,0 +1,72 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+<div class="layui-fluid" style="margin-top: 20px;">
+    <div class="layui-row">
+        <form class="layui-form" action="" lay-filter="category-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label">分类名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="name" required lay-verify="required" placeholder="请输入分类名称" autocomplete="off" class="layui-input" value="{{ category.name if category else '' }}">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">分类别名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="slug" required lay-verify="required" placeholder="请输入分类别名" autocomplete="off" class="layui-input" value="{{ category.slug if category else '' }}">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">分类描述</label>
+                <div class="layui-input-block">
+                    <textarea name="description" placeholder="请输入分类描述" class="layui-textarea">{{ category.description if category else '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="category-submit">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+layui.use(['form', 'layer'], function(){
+    var form = layui.form;
+    var layer = layui.layer;
+    var $ = layui.$;
+
+    //监听提交
+    form.on('submit(category-submit)', function(data){
+        $.ajax({
+            url: '/admin/category/{{ category.id }}',
+            type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(data.field),
+            success: function(res) {
+                if (res.code === 20000000) {
+                    layer.msg('更新成功', {icon: 1}, function() {
+                        parent.layui.table.reload('categories-table');
+                        parent.layer.closeAll();
+                    });
+                } else {
+                    layer.msg('更新失败: ' + res.message, {icon: 2});
+                }
+            },
+            error: function() {
+                layer.msg('请求失败', {icon: 2});
+            }
+        });
+        return false;
+    });
+});
+</script>
+{% endblock %}

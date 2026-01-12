@@ -1,0 +1,105 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+<div class="layui-fluid">
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">关于系统</div>
+                <div class="layui-card-body pad15">
+                    <div class="layui-row layui-col-space15">
+                        <div class="layui-col-md6">
+                            <div class="layui-card">
+                                <div class="layui-card-body">
+                                    <h3>FlaskCMS 内容管理系统</h3>
+                                    <p>FlaskCMS 是一个基于 Flask 框架开发的内容管理系统，旨在提供简洁、高效的内容管理解决方案。</p>
+                                    <p><strong>版本：</strong>v1.0.0</p>
+                                    <p><strong>开发语言：</strong>Python</p>
+                                    <p><strong>框架：</strong>Flask</p>
+                                    <p><strong>前端框架：</strong>Layui</p>
+                                    <p><strong>数据库：</strong>SQLite</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-col-md6">
+                            <div class="layui-card">
+                                <div class="layui-card-body">
+                                    <h3>系统特性</h3>
+                                    <ul>
+                                        <li>用户管理：支持用户注册、登录、权限管理</li>
+                                        <li>内容管理：文章、页面、分类、标签管理</li>
+                                        <li>多媒体管理：支持图片、文档、视频等文件上传</li>
+                                        <li>评论管理：支持用户评论功能</li>
+                                        <li>响应式设计：支持多种设备访问</li>
+                                        <li>安全机制：用户权限控制、密码加密等</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-col-md12">
+                            <div class="layui-card">
+                                <div class="layui-card-body">
+                                    <h3>技术栈</h3>
+                                    <div class="layui-row layui-col-space10">
+                                        <div class="layui-col-md2">
+                                            <div class="layui-card" style="text-align: center;">
+                                                <div class="layui-card-body">
+                                                    <p>Python</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-md2">
+                                            <div class="layui-card" style="text-align: center;">
+                                                <div class="layui-card-body">
+                                                    <p>Flask</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-md2">
+                                            <div class="layui-card" style="text-align: center;">
+                                                <div class="layui-card-body">
+                                                    <p>SQLite</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-md2">
+                                            <div class="layui-card" style="text-align: center;">
+                                                <div class="layui-card-body">
+                                                    <p>HTML/CSS</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-md2">
+                                            <div class="layui-card" style="text-align: center;">
+                                                <div class="layui-card-body">
+                                                    <p>JavaScript</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-md2">
+                                            <div class="layui-card" style="text-align: center;">
+                                                <div class="layui-card-body">
+                                                    <p>Layui</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+layui.use(['element'], function(){
+    var element = layui.element;
+});
+</script>
+{% endblock %}

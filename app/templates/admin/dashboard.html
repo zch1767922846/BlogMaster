@@ -1,0 +1,111 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <!-- 统计卡片 -->
+        <div class="layui-col-md4">
+            <div class="layui-card">
+                <div class="layui-card-header">用户统计</div>
+                <div class="layui-card-body">
+                    <div class="layui-stat layui-stat-danger">
+                        <div class="layui-stat-icon">
+                            <i class="layui-icon layui-icon-user"></i>
+                        </div>
+                        <div class="layui-stat-content">
+                            <div class="layui-stat-title">用户总数</div>
+                            <div class="layui-stat-value">{{ user_count }}</div>
+                            <div class="layui-stat-text">较昨日 +2</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-col-md4">
+            <div class="layui-card">
+                <div class="layui-card-header">内容统计</div>
+                <div class="layui-card-body">
+                    <div class="layui-stat layui-stat-success">
+                        <div class="layui-stat-icon">
+                            <i class="layui-icon layui-icon-file"></i>
+                        </div>
+                        <div class="layui-stat-content">
+                            <div class="layui-stat-title">文章总数</div>
+                            <div class="layui-stat-value">{{ post_count }}</div>
+                            <div class="layui-stat-text">较昨日 +5</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-col-md4">
+            <div class="layui-card">
+                <div class="layui-card-header">互动统计</div>
+                <div class="layui-card-body">
+                    <div class="layui-stat layui-stat-primary">
+                        <div class="layui-stat-icon">
+                            <i class="layui-icon layui-icon-dialogue"></i>
+                        </div>
+                        <div class="layui-stat-content">
+                            <div class="layui-stat-title">评论总数</div>
+                            <div class="layui-stat-value">{{ comment_count }}</div>
+                            <div class="layui-stat-text">较昨日 +12</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 最近用户列表 -->
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">最近注册用户</div>
+                <div class="layui-card-body">
+                    <table class="layui-table" lay-even>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>用户名</th>
+                                <th>昵称</th>
+                                <th>邮箱</th>
+                                <th>注册时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in recent_users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.nickname or '-' }}</td>
+                                <td>{{ user.email or '-' }}</td>
+                                <td>{{ user.registertime.strftime('%Y-%m-%d %H:%M:%S') if user.registertime else '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+layui.use(['element', 'util'], function(){
+    var element = layui.element;
+    var util = layui.util;
+    
+    // 格式化时间显示
+    $('.layui-stat-text').each(function() {
+        var text = $(this).text();
+        if (text.includes('较昨日')) {
+            $(this).html('<span style="color: #5FB878;">' + text + '</span>');
+        }
+    });
+});
+</script>
+{% endblock %}

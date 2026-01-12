@@ -1,0 +1,117 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+    <div class="layui-fluid">
+        <div class="layui-row">
+            <!-- 标签列表表格（展示t_tag所有字段） -->
+            <table class="layui-hide" id="tags-table" lay-filter="filter-tag-table"></table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <!-- 工具栏模板 -->
+    <script type="text/html" id="toolbar-tags">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm" lay-event="add">添加标签</button>
+        </div>
+    </script>
+
+    <!-- 操作列模板 -->
+    <script type="text/html" id="toolbar-tag">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+
+    <script>
+    layui.use(['table', 'layer'], function() {
+        var table = layui.table;
+        var layer = layui.layer;
+
+        // 渲染标签表格（展示t_tag所有字段）
+        table.render({
+            elem: '#tags-table',
+            url: '/admin/tags',  // 对接后端标签列表接口
+            method: 'GET',
+            toolbar: '#toolbar-tags',
+            // 适配后端返回格式（与分类列表一致）
+            request: {
+                pageName: 'page',
+                limitName: 'limit'
+            },
+            response: {
+                statusName: 'code',
+                statusCode: 20000000,
+                msgName: 'message',
+                countName: 'count',
+                dataName: 'data'
+            },
+            // 列配置：展示t_tag所有字段
+            cols: [[
+                {field: 'id', title: 'ID', width: 80, fixed: 'left', sort: true},
+                {field: 'name', title: '标签名称', width: 200},
+                {fixed: 'right', title: '操作', toolbar: '#toolbar-tag', width: 150}
+            ]],
+            page: true,
+            limit: 10,
+            limits: [10, 20, 30],
+            height: 'full-120',
+            done: function(res, curr, count) {
+                // 错误处理
+                if (res.code !== 20000000) {
+                    layer.msg(res.message, {icon: 5});
+                }
+            }
+        });
+
+        // 监听添加标签按钮
+        table.on('toolbar(filter-tag-table)', function(obj) {
+            if (obj.event === 'add') {
+                layer.open({
+                    type: 2,
+                    title: '添加标签',
+                    area: ['500px', '300px'],
+                    content: '/admin/tag',
+                    maxmin: true
+                });
+            }
+        });
+
+        // 监听编辑/删除操作
+        table.on('tool(filter-tag-table)', function(obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') {
+                // 编辑标签
+                layer.open({
+                    type: 2,
+                    title: '编辑标签',
+                    area: ['500px', '300px'],
+                    content: '/admin/tag/' + data.id,
+                    maxmin: true
+                });
+            } else if (obj.event === 'del') {
+                // 删除标签
+                layer.confirm('确定删除该标签吗？', function(index) {
+                    $.ajax({
+                        url: '/admin/tags/' + data.id,
+                        type: 'DELETE',
+                        success: function(res) {
+                            if (res.code === 20000000) {
+                                layer.msg('删除成功', {icon: 1});
+                                obj.del();
+                            } else {
+                                layer.msg(res.message, {icon: 5});
+                            }
+                        },
+                        error: function() {
+                            layer.msg('请求失败', {icon: 5});
+                        }
+                    });
+                    layer.close(index);
+                });
+            }
+        });
+    });
+    </script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+    <div class="layui-fluid" style="margin:10px 0px">
+        <form class="layui-form layui-form-pane" action="/admin/tag" method="post">
+            <div class="layui-row layui-col-space20">
+                {{ form.csrf_token }}
+                <div class="layui-col-lg8">
+                    <div class="layui-row">
+                        <div class="layui-col-lg12">
+                            <div class="layui-col-lg8">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">标签名称</label>
+                                    <div class="layui-input-block">
+                                        {{ form.name(class="layui-input", placeholder="请输入标签名称") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            {# 修复模板语法错误，正确传递参数 #}
+                            {{ form.submit(class_="layui-btn", lay_submit="", lay_filter="submit-tag") }}
+                            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script>
+        layui.use(['form'], function() {
+            var form = layui.form;
+
+            // 监听提交
+            form.on('submit(submit-tag)', function(data) {
+                $.ajax({
+                    url: '/admin/tag',
+                    type: 'POST',
+                    data: data.field,
+                    success: function(res) {
+                        if (res.code === 20000000) {
+                            parent.layer.msg('添加成功', {icon: 1});
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                            parent.location.reload();
+                        } else {
+                            layer.msg(res.message, {icon: 2});
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+{% endblock %}

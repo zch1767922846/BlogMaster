@@ -1,0 +1,94 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+<div class="layui-fluid">
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">安全设置</div>
+                <div class="layui-card-body" pad15>
+                    <form class="layui-form" action="{{ url_for('bp_admin.user_security') }}" method="post">
+                        <div class="layui-form layui-row layui-col-space16">
+                            <div class="layui-col-md6">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">当前密码</label>
+                                    <div class="layui-input-block">
+                                        <input type="password" name="old_password" required lay-verify="required" placeholder="请输入当前密码" class="layui-input">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">新密码</label>
+                                    <div class="layui-input-block">
+                                        <input type="password" name="new_password" required lay-verify="required" placeholder="请输入新密码" class="layui-input">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">确认新密码</label>
+                                    <div class="layui-input-block">
+                                        <input type="password" name="confirm_password" required lay-verify="required|confirm" placeholder="请再次输入新密码" class="layui-input">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <div class="layui-input-block">
+                                        <button class="layui-btn" lay-submit lay-filter="security-save">修改密码</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-col-md6">
+                                <div class="layui-card">
+                                    <div class="layui-card-header">安全提示</div>
+                                    <div class="layui-card-body">
+                                        <ul class="layui-timeline">
+                                            <li class="layui-timeline-item">
+                                                <i class="layui-icon layui-timeline-axis"></i>
+                                                <div class="layui-timeline-content layui-text">
+                                                    <h3 class="layui-timeline-title">密码安全建议</h3>
+                                                    <ul>
+                                                        <li>密码长度至少8位</li>
+                                                        <li>包含大小写字母、数字和特殊字符</li>
+                                                        <li>定期更换密码</li>
+                                                        <li>不要使用常见密码</li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li class="layui-timeline-item">
+                                                <i class="layui-icon layui-timeline-axis"></i>
+                                                <div class="layui-timeline-content layui-text">
+                                                    <h3 class="layui-timeline-title">登录安全</h3>
+                                                    <ul>
+                                                        <li>定期检查登录记录</li>
+                                                        <li>发现异常及时修改密码</li>
+                                                        <li>使用安全的网络环境</li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+layui.use(['form'], function(){
+    var form = layui.form;
+    
+    // 自定义验证规则
+    form.verify({
+        confirm: function(value){
+            var new_password = $("input[name='new_password']").val();
+            if(value !== new_password){
+                return '两次输入的密码不一致';
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

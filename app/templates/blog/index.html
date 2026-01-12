@@ -1,0 +1,154 @@
+{% extends 'blog/base_with_nav.html' %}
+
+{% block title %}首页{% endblock %}
+
+{% block content %}
+    <!-- 置顶文章 -->
+    {% if featured_posts %}
+    <div class="mb-4">
+        <h4 class="border-bottom pb-2 mb-3">置顶文章</h4>
+        {% for post in featured_posts %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title post-title">
+                    <a href="{{ url_for('bp_blog.post_detail', slug=post.slug) }}">
+                        {{ post.title }}
+                    </a>
+                </h5>
+                <p class="card-text post-excerpt">{{ post.excerpt or post.content[:200] + "..." }}</p>
+                <div class="d-flex justify-content-between align-items-center post-meta">
+                    <div>
+                        <span class="me-3">
+                            <i class="fa fa-calendar"></i>
+                            {{ post.publishtime.strftime('%Y-%m-%d') if post.publishtime else post.publishtime.strftime('%Y-%m-%d') }}
+                        </span>
+                        <span class="me-3">
+                            <i class="fa fa-folder"></i>
+                            {% if post.category %}
+                                <a href="{{ url_for('bp_blog.posts_by_category', category_id=post.category.id) }}" class="text-decoration-none">{{ post.category.name }}</a>
+                            {% else %}
+                                未分类
+                            {% endif %}
+                        </span>
+                        <span>
+                            <i class="fa fa-user"></i>
+                            {{ post.author }}
+                        </span>
+                    </div>
+                    <a href="{{ url_for('bp_blog.post_detail', slug=post.slug) }}" class="btn btn-primary btn-sm">阅读更多</a>
+                </div>
+                {% if post.tags %}
+                <div class="tag-cloud mt-2">
+                    {% for tag in post.tags %}
+                        <a href="{{ url_for('bp_blog.tag_posts', tag_id=tag.id) }}">{{ tag.name }}</a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- 最新文章 -->
+    <div>
+        {% if posts %}
+            {% for post in posts %}
+            <div class="card mb-4 post-item">
+                <div class="card-body">
+                    <h5 class="card-title post-title">
+                        <a href="{{ url_for('bp_blog.post_detail', slug=post.slug) }}">
+                            {{ post.title }}
+                        </a>
+                    </h5>
+                    <p class="card-text post-excerpt">{{ post.excerpt or post.content[:200] + "..." }}</p>
+                    <div class="d-flex justify-content-between align-items-center post-meta">
+                        <div>
+                            <span class="me-3">
+                                <i class="fa fa-calendar"></i>
+                                {{ post.publishtime.strftime('%Y-%m-%d') if post.publishtime else post.publishtime.strftime('%Y-%m-%d') }}
+                            </span>
+                            <span class="me-3">
+                                <i class="fa fa-folder"></i>
+                                {% if post.category %}
+                                    <a href="{{ url_for('bp_blog.posts_by_category', category_id=post.category.id) }}" class="text-decoration-none">{{ post.category.name }}</a>
+                                {% else %}
+                                    未分类
+                                {% endif %}
+                            </span>
+                            <span>
+                                <i class="fa fa-user"></i>
+                                {{ post.author }}
+                            </span>
+                        </div>
+                        <a href="{{ url_for('bp_blog.post_detail', slug=post.slug) }}" class="btn btn-primary btn-sm">阅读更多</a>
+                    </div>
+                    {% if post.tags %}
+                    <div class="tag-cloud mt-2">
+                        {% for tag in post.tags %}
+                            <a href="{{ url_for('bp_blog.tag_posts', tag_id=tag.id) }}">{{ tag.name }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-muted d-flex justify-content-between post-meta">
+                    <span>
+                        <i class="fa fa-eye"></i> 阅读次数: {{ post.counter or 0 }}
+                    </span>
+                    <span>
+                        <i class="fa fa-calendar"></i> {{ post.publishtime.strftime('%Y-%m-%d %H:%M') if post.publishtime else '' }}
+                        <i class="fa fa-heart ms-2"></i> {{ post.favorites_count or 0 }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- 分页 -->
+            {% if pagination.pages > 1 %}
+            <nav aria-label="分页导航">
+                <ul class="pagination justify-content-center">
+                    {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('bp_blog.index', page=pagination.prev_num) }}">上一页</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">上一页</span>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in pagination.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != pagination.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('bp_blog.index', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">…</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('bp_blog.index', page=pagination.next_num) }}">下一页</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">下一页</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <p>暂无文章</p>
+        {% endif %}
+    </div>
+{% endblock %}

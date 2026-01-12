@@ -1,0 +1,93 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">基本资料</div>
+                <div class="layui-card-body" pad15>
+                    <form class="layui-form" action="{{ url_for('bp_admin.user_profile') }}" method="post">
+                        <div class="layui-form layui-row layui-col-space16">
+                            <div class="layui-col-md4">
+                                <div class="layui-card">
+                                    <div class="layui-card-body" style="text-align: center;">
+                                        <img src="{{ url_for('static', filename=user.avatar) if user.avatar else '//tva1.sinaimg.cn/crop.0.0.118.118.180/5db11ff4gw1e77d3nqrv8j203k03kweg.jpg' }}" id="avatar-preview" class="layui-nav-img" style="width: 100px; height: 100px;">
+                                        <div class="layui-form-item">
+                                            <label class="layui-form-label">头像</label>
+                                            <div class="layui-input-block">
+                                                <button type="button" class="layui-btn" id="upload-avatar">
+                                                    <i class="layui-icon">&#xe67c;</i> 上传头像
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-col-md8">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">用户名</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" class="layui-input" value="{{ user.username }}" readonly>
+                                        <div class="layui-form-mid layui-word-aux">不可修改</div>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">昵称</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="nickname" value="{{ user.nickname or '' }}" class="layui-input" placeholder="请输入昵称">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">邮箱</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="email" value="{{ user.email or '' }}" class="layui-input" placeholder="请输入邮箱">
+                                    </div>
+                                </div>
+
+                                <div class="layui-form-item">
+                                    <div class="layui-input-block">
+                                        <button class="layui-btn" lay-submit lay-filter="profile-save">保存</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+layui.use(['form', 'upload', 'layer'], function(){
+    var form = layui.form;
+    var upload = layui.upload;
+    var layer = layui.layer;
+    
+    // 头像上传
+    upload.render({
+        elem: '#upload-avatar'
+        ,url: '{{ url_for("bp_admin.upload_avatar") }}' // 上传接口
+        ,accept: 'images'
+        ,acceptMime: 'image/*'
+        ,exts: 'jpg|png|gif|jpeg|webp'
+        ,field: 'file'
+        ,done: function(res){
+            if(res.code === 0){
+                layer.msg('上传成功');
+                // 更新头像显示
+                document.getElementById('avatar-preview').src = res.data.src + '?' + new Date().getTime();
+            } else {
+                layer.msg(res.msg || '上传失败');
+            }
+        }
+        ,error: function(){
+            layer.msg('上传失败');
+        }
+    });
+});
+</script>
+{% endblock %}

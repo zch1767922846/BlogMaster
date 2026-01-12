@@ -1,0 +1,28 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+    <div class="layui-fluid">
+        <div class="layui-row">
+            <table class="layui-hide" id="pages-table" lay-filter="filter-page-table"></table>
+        </div>
+    </div>
+
+{% endblock %}
+{% block script %}
+    {{ super() }}
+    {# 工具栏#}
+    <script type="text/html" id="toolbar-pages">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm" lay-event="add">添加页面</button>
+        </div>
+    </script>
+
+    {# 单元格工具#}
+    <script type="text/html" id="toolbar-page">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+
+    <script src="{{ url_for('static',filename='/js/page.js') }}" charset="utf-8"></script>
+
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+    <div class="layui-fluid" style="margin:10px 0px">
+        <form class="layui-form layui-form-pane" id="post-form" method="post" enctype="multipart/form-data">
+            <div class="layui-row layui-col-space20">
+                {{ post_form.csrf_token }}
+                <div class="layui-col-lg8">
+                    <div class="layui-row">
+                        <div class="layui-col-lg12">
+                            <div class="layui-col-lg8">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">文章标题</label>
+                                    <div class="layui-input-block">
+                                        {{ post_form.title(class="layui-input",placeholder="请输入文章标题") }}
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">文章别名</label>
+                                    <div class="layui-input-block">
+                                        {{ post_form.slug(class="layui-input",placeholder="请输入文章标题别名") }}
+                                    </div>
+                                </div>
+                                <div class="layui-form-item layui-form-text">
+                                    <label class="layui-form-label">文章摘要 </label>
+                                    <div class="layui-input-block">
+                                        {{ post_form.excerpt(class="layui-textarea") }}
+                                    </div>
+                                </div>
+                                <div class="layui-form-item layui-form-text">
+                                    <label class="layui-form-label">文章内容</label>
+                                    <div class="layui-input-block">
+                                        {{ post_form.content(class="layui-textarea", style="height:400px;") }}
+                                    </div>
+                                </div>
+                                                            
+                                <!-- 多媒体文件上传 -->
+                                <div class="layui-form-item layui-form-text">
+                                    <label class="layui-form-label">上传附件</label>
+                                    <div class="layui-input-block">
+                                        {{ post_form.media_files(class="layui-input", type="file") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-col-lg4">
+                    <div class="layui-card">
+                        <div class="layui-card-header">发布设置</div>
+                        <div class="layui-card-body">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">文章分类</label>
+                                <div class="layui-input-block">
+                                    {{ post_form.categoryid(class="layui-select") }}
+                                </div>
+                            </div>
+
+                            <!-- 标签选择区域 -->
+                            <div class="layui-form-item" pane>
+                                <label class="layui-form-label">文章标签</label>
+                                <div class="layui-input-block">
+                                    {% for tag in tags %}
+                                    <input type="checkbox" name="tag_ids"
+                                           value="{{ tag.id }}"
+                                           title="{{ tag.name }}"
+                                           {% if tag in post_tags %}checked{% endif %}>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item" pane>
+                                <button type="submit" class="layui-btn" lay-submit="" lay-filter="publish">发布</button>
+                                <button type="submit" class="layui-btn layui-btn-primary" lay-submit="" lay-filter="save">保存</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script>
+        layui.use(['form', 'layer'], function() {
+            var form = layui.form;
+            var layer = layui.layer;
+
+            // 渲染表单
+            form.render();
+
+            // 监听发布按钮 - 状态1
+            form.on('submit(publish)', function(data) {
+                data.field.status = 1;
+                submitForm(data.field, '发布');
+                return false;
+            });
+
+            // 监听保存按钮 - 状态0
+            form.on('submit(save)', function(data) {
+                data.field.status = 0;
+                submitForm(data.field, '保存');
+                return false;
+            });
+
+            function submitForm(formData, action) {
+                $.ajax({
+                    url: '/admin/post/{{ post_id }}',
+                    type: 'PUT',
+                    data: formData,
+                    success: function(res) {
+                        if (res.code === 20000000) {
+                            layer.msg(action + '成功', {icon: 6}, function() {
+                                var index = parent.layer.getFrameIndex(window.name);
+                                parent.layer.close(index);
+                                parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(res.message, {icon: 5});
+                        }
+                    },
+                    error: function(xhr) {
+                        layer.msg('请求失败: ' + xhr.responseText, {icon: 5});
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

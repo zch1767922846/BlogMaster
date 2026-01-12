@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    {% if title %}
+        <title>{{ title }}</title>
+    {% else %}
+        <title>FlaskCMS</title>
+    {% endif %}
+    {% if keywords %}
+        <meta name="keywords" content="{{ keywords }}">
+    {% else %}
+        <meta name="keywords" content="FlaskCMS">
+    {% endif %}
+    {% if description %}
+        <meta name="description" content="{{ description }}">
+    {% else %}
+        <meta name="description"
+              content="FlaskCMS是基于一款基于Flask的CMS系统，基于该系统，可以方便的的搭建自己的内容管理系统或者博客系统">
+    {% endif %}
+
+
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    {% block style %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='lib/bootstrap/css/bootstrap.min.css') }}" media="all">
+        <link rel="stylesheet" href="{{ url_for('static', filename='lib/font-awesome/css/font-awesome.min.css') }}" media="all">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/blog.css') }}" media="all">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}" media="all">
+        <!--[if lt IE 9]>
+        <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+        <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    {% endblock %}
+</head>
+<body>
+{% include 'blog/header.html' %}
+
+
+{% block main %}{% endblock %}
+
+
+{% include 'blog/footer.html' %}
+
+
+{% block script %}
+    <script src="{{ url_for('static', filename='lib/bootstrap/js/bootstrap.bundle.min.js') }}" charset="utf-8"></script>
+
+{% endblock %}
+
+</body>
+</html>

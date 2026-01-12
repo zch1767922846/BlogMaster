@@ -1,0 +1,110 @@
+{% extends 'blog/base_with_nav.html' %}
+
+{% block title %}首页 - 我的博客{% endblock %}
+
+{% block content %}
+
+{% if current_category %}
+<h3 class="mb-4">分类: {{ current_category.name }}</h3>
+{% endif %}
+
+    {% if posts %}
+        {% for post in posts %}
+        <div class="card post-item">
+            <div class="card-body">
+                <h5 class="card-title post-title">
+                    <a href="{{ url_for('bp_blog.post_detail', slug=post.slug) }}">
+                        {{ post.title }}
+                    </a>
+                </h5>
+                <p class="card-text post-excerpt">{{ post.excerpt or post.content[:200] + "..." }}</p>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="btn-group">
+                        <a href="{{ url_for('bp_blog.post_detail', slug=post.slug) }}" class="btn btn-sm btn-outline-primary">阅读全文</a>
+                        {% if current_user.is_authenticated and post.author == current_user.username %}
+                            <a href="{{ url_for('bp_blog.edit_post', post_id=post.id) }}" class="btn btn-sm btn-outline-secondary">编辑</a>
+                        {% endif %}
+                    </div>
+                    <small class="text-muted">
+                        <span class="badge bg-secondary">{{ post.category.name if post.category else '未分类' }}</span>
+                        {% if post.tags %}
+                            {% for tag in post.tags %}
+                                <span class="badge bg-info">{{ tag.name }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+            <div class="card-footer text-muted d-flex justify-content-between post-meta">
+                <span>
+                    作者:
+                    {% if post.author_id %}
+                        <a href="{{ url_for('bp_blog.user_posts', user_id=post.author_id) }}" class="text-decoration-none">{{ post.author }}</a>
+                    {% else %}
+                        <span class="text-decoration-none">{{ post.author }}</span>
+                    {% endif %}
+                </span>
+                <span>
+                    <i class="fa fa-calendar"></i> {{ post.publishtime.strftime('%Y-%m-%d %H:%M') if post.publishtime else '' }}
+                    <i class="fa fa-eye ms-2"></i> {{ post.counter or 0 }}
+                    <i class="fa fa-heart ms-2"></i> {{ post.favorites_count or 0 }}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- 分页 -->
+        {% if pagination.pages > 1 %}
+        <nav aria-label="文章分页">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('bp_blog.user_home', page=pagination.prev_num) }}">上一页</a>
+                    </li>
+                {% endif %}
+
+                {% for page_num in pagination.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != pagination.page %}
+                            <li class="page-item">
+                                {% if current_category %}
+                                <a class="page-link" href="{{ url_for('bp_blog.posts_by_category', category_id=current_category.id, page=page_num) }}">{{ page_num }}</a>
+                                {% else %}
+                                <a class="page-link" href="{{ url_for('bp_blog.user_home', page=page_num) }}">{{ page_num }}</a>
+                                {% endif %}
+                            </li>
+                        {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                    <li class="page-item">
+                        {% if current_category %}
+                        <a class="page-link" href="{{ url_for('bp_blog.posts_by_category', category_id=current_category.id, page=pagination.next_num) }}">下一页</a>
+                        {% else %}
+                        <a class="page-link" href="{{ url_for('bp_blog.user_home', page=pagination.next_num) }}">下一页</a>
+                        {% endif %}
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            {% if current_category %}
+            该分类下暂无已发布的文章。
+            {% else %}
+            暂无已发布的文章。
+            {% endif %}
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('bp_blog.create_post') }}" class="alert-link">点击发布第一篇文章</a>
+            {% else %}
+                <a href="{{ url_for('bp_blog.login') }}" class="alert-link">登录</a>后可以发布文章
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}

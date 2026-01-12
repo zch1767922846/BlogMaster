@@ -1,0 +1,85 @@
+{% extends 'blog/base_with_nav.html' %}
+
+{% block title %}我的草稿 - 我的博客{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="mb-0">我的草稿</h2>
+        <a href="{{ url_for('bp_blog.create_post') }}" class="btn btn-primary">写文章</a>
+    </div>
+    <div class="card-body">
+        {% if drafts %}
+            {% for post in drafts %}
+            <div class="card mb-4 post-item">
+                <div class="card-body">
+                    <h5 class="card-title post-title">
+                        <a href="{{ url_for('bp_blog.edit_draft', post_id=post.id) }}"
+                           class="text-decoration-none text-dark">
+                            {{ post.title or '无标题' }}
+                        </a>
+                    </h5>
+                    <p class="card-text post-excerpt">{{ (post.excerpt or post.content)[:100]|truncate(100) }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                            <a href="{{ url_for('bp_blog.edit_draft', post_id=post.id) }}"
+                               class="btn btn-sm btn-outline-secondary">编辑</a>
+                            <a href="{{ url_for('bp_blog.publish_draft', post_id=post.id) }}"
+                               class="btn btn-sm btn-outline-primary">发布</a>
+                        </div>
+                        <small class="text-muted">
+                            最后编辑: {{ post.updatetime.strftime('%Y-%m-%d %H:%M') if post.updatetime else '' }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- 分页 -->
+            {% if pagination.pages > 1 %}
+            <nav aria-label="草稿分页">
+                <ul class="pagination justify-content-center">
+                    {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('bp_blog.drafts', page=pagination.prev_num) }}">上一页</a>
+                        </li>
+                    {% endif %}
+
+                    {% for page_num in pagination.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != pagination.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('bp_blog.drafts', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">…</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('bp_blog.drafts', page=pagination.next_num) }}">下一页</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">下一页</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                暂无草稿，<a href="{{ url_for('bp_blog.create_post') }}" class="alert-link">点击发布新文章</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

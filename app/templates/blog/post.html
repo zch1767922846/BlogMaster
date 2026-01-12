@@ -1,0 +1,308 @@
+{% extends 'blog/base_with_nav.html' %}
+
+{% block title %}{{ post.title }} - 我的博客{% endblock %}
+
+{% block content %}
+<article class="card">
+    <div class="card-body">
+        <header class="article-header">
+            <h1 class="article-title">{{ post.title }}</h1>
+            <div class="article-meta d-flex flex-wrap gap-3 text-muted small">
+                <span class="d-flex align-items-center">
+                    <i class="fa fa-calendar me-1"></i>
+                    发布于 {{ post.publishtime.strftime('%Y-%m-%d %H:%M') if post.publishtime else '' }}
+                </span>
+                <span class="d-flex align-items-center">
+                    <i class="fa fa-folder me-1"></i>
+                    {{ category.name if category else '未分类' }}
+                </span>
+                <span class="d-flex align-items-center">
+                    <i class="fa fa-user me-1"></i>
+                    {{ author.nickname if author and author.nickname else (author.username if author else '未知作者') }}
+                </span>
+                <span class="d-flex align-items-center">
+                    <i class="fa fa-eye me-1"></i>
+                    阅读次数: {{ post.counter or 0 }}
+                </span>
+                <span class="d-flex align-items-center">
+                    <i class="fa fa-heart me-1"></i>
+                    收藏次数: {{ post.favorites_count or 0 }}
+                </span>
+            </div>
+        </header>
+
+        <section class="article-content mb-5">
+            {{ post.content|safe }}
+            
+            <!-- 显示文章关联的多媒体文件 -->
+            {% if post.medias %}
+            <div class="article-medias mt-4">
+                <h5 class="mb-3">相关附件</h5>
+                <div class="row g-3">
+                    {% for media in post.medias %}
+                    <div class="col-md-3 col-sm-6 col-6">
+                        {% if media.is_image %}
+                            <a href="{{ url_for('bp_admin.uploaded_files', filename=media.filepath) }}" target="_blank" class="d-block text-center">
+                                <img src="{{ url_for('bp_admin.uploaded_files', filename=media.filepath) }}" class="img-fluid rounded border" alt="{{ media.filename }}" style="max-height: 150px; object-fit: cover;">
+                            </a>
+                        {% elif media.is_video %}
+                            <video controls class="img-fluid rounded border" style="max-height: 150px;">
+                                <source src="{{ url_for('bp_admin.uploaded_files', filename=media.filepath) }}" type="{{ media.mime_type }}">
+                                您的浏览器不支持视频播放。
+                            </video>
+                        {% elif media.is_audio %}
+                            <audio controls class="w-100">
+                                <source src="{{ url_for('bp_admin.uploaded_files', filename=media.filepath) }}" type="{{ media.mime_type }}">
+                                您的浏览器不支持音频播放。
+                            </audio>
+                        {% else %}
+                            <div class="media-file text-center p-3 border rounded bg-light">
+                                <i class="fa {% if media.is_document %}fa-file-text{% elif media.is_archive %}fa-file-archive{% else %}fa-file{% endif %} fa-2x text-muted mb-2"></i>
+                                <div class="media-filename small text-truncate" title="{{ media.filename }}">{{ media.filename|truncate(20, True) }}</div>
+                                <div class="media-size small text-muted">{{ (media.file_size/1024)|round(2) }} KB</div>
+                                <a href="{{ url_for('bp_admin.uploaded_files', filename=media.filepath) }}" class="btn btn-sm btn-outline-primary mt-2 d-block" target="_blank">下载</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
+        {% if tags %}
+        <div class="tag-cloud mb-4">
+            <h6 class="mb-3">标签:</h6>
+            {% for tag in tags %}
+                <a href="{{ url_for('bp_blog.tag_posts', tag_id=tag.id) }}" class="btn btn-outline-secondary btn-sm me-2 mb-2">{{ tag.name }}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if current_user.is_authenticated %}
+        <div class="mb-4">
+            {% if current_user.has_favorited(post) %}
+            <form method="post" action="{{ url_for('bp_blog.unfavorite_post', post_id=post.id) }}" class="d-inline">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa fa-heart"></i> 取消收藏
+                </button>
+            </form>
+            {% else %}
+            <form method="post" action="{{ url_for('bp_blog.favorite_post', post_id=post.id) }}" class="d-inline">
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="fa fa-heart"></i> 收藏文章
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</article>
+
+<!-- 评论区域 -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">评论 ({{ comments|length }})</h5>
+    </div>
+    <div class="card-body">
+        <!-- 评论列表 -->
+        {% if comments %}
+            {% for comment in comments %}
+            <div class="border-bottom pb-3 mb-3">
+                <div class="d-flex justify-content-between">
+                    <strong>{{ comment.author }}</strong>
+                    <small class="text-muted">{{ comment.date.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+                <p class="mt-2 mb-0">{{ comment.content }}</p>
+                
+                <!-- 显示评论关联的多媒体文件 -->
+                {% if comment.medias %}
+                <div class="comment-medias mt-2">
+                    {% for media in comment.medias %}
+                    <div class="comment-media-item d-inline-block me-2">
+                        {% if media.is_image %}
+                            <a href="{{ url_for('bp_admin.uploaded_files', filename=media.filepath) }}" target="_blank">
+                                <img src="{{ url_for('bp_admin.uploaded_files', filename=media.filepath) }}" class="img-thumbnail" style="max-height: 100px; max-width: 100px; object-fit: cover;" alt="{{ media.filename }}">
+                            </a>
+                        {% elif media.is_video %}
+                            <video controls class="img-thumbnail" style="max-height: 100px;">
+                                <source src="{{ url_for('bp_admin.uploaded_files', filename=media.filepath) }}" type="{{ media.mime_type }}">
+                                您的浏览器不支持视频播放。
+                            </video>
+                        {% elif media.is_audio %}
+                            <audio controls style="width: 200px;">
+                                <source src="{{ url_for('bp_admin.uploaded_files', filename=media.filepath) }}" type="{{ media.mime_type }}">
+                                您的浏览器不支持音频播放。
+                            </audio>
+                        {% else %}
+                            <div class="comment-media-file d-inline-block">
+                                <i class="fa {% if media.is_document %}fa-file-text{% elif media.is_archive %}fa-file-archive{% else %}fa-file{% endif %} text-muted"></i>
+                                <a href="{{ url_for('bp_admin.uploaded_files', filename=media.filepath) }}" target="_blank" class="ms-1 text-truncate" style="max-width: 100px;" title="{{ media.filename }}">{{ media.filename|truncate(15, True) }}</a>
+                                <small class="text-muted">({{ (media.file_size/1024)|round(2) }} KB)</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">暂无评论，快来抢沙发吧！</p>
+        {% endif %}
+
+        <!-- 评论表单 -->
+        <hr>
+        {% if current_user.is_authenticated %}
+        <h5>发表评论</h5>
+        <form method="post" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="mb-3 position-relative">
+                <label for="content" class="form-label">评论内容 *</label>
+                {{ form.content(class="form-control", id="content", rows="4") }}
+                {% for error in form.content.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+                
+                <!-- 上传多媒体文件（可选） -->
+                <div class="mb-3 mt-3">
+                    <label for="media_files" class="form-label">上传多媒体文件（可选）</label>
+                    {{ form.media_files(class="form-control", id="media_files") }}
+                    {% for error in form.media_files.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <!-- 表情包选择器和发表评论按钮布局 -->
+                <div class="mt-2 d-flex justify-content-between align-items-start">
+                    <!-- 表情包选择器 -->
+                    <div class="d-flex align-items-start position-relative" style="min-height: 200px;">
+                        <button type="button" class="btn btn-outline-secondary btn-sm me-2" id="emoji-toggle-btn" style="z-index: 1001;">
+                            <i class="fa fa-smile"></i> 表情
+                        </button>
+                    <!-- 表情包选择器弹出框 -->
+                    <div id="emoji-selector-popup" class="emoji-selector-popup position-absolute" style="display: none; z-index: 1000; background: white; border: 1px solid #ddd; border-radius: 5px; padding: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; width: 300px;">
+                        <div class="emoji-grid row g-1">
+                            {% for emoji_code, emoji_char in [
+                                ('😀', '😀'), ('😃', '😃'), ('😄', '😄'), ('😁', '😁'), 
+                                ('😆', '😆'), ('😅', '😅'), ('😂', '😂'), ('🤣', '🤣'),
+                                ('😊', '😊'), ('😇', '😇'), ('🙂', '🙂'), ('🙃', '🙃'),
+                                ('😉', '😉'), ('😌', '😌'), ('😍', '😍'), ('🥰', '🥰'),
+                                ('😘', '😘'), ('😗', '😗'), ('😙', '😙'), ('😚', '😚'),
+                                ('😋', '😋'), ('😛', '😛'), ('😝', '😝'), ('😜', '😜'),
+                                ('🤪', '🤪'), ('🤨', '🤨'), ('🧐', '🧐'), ('🤓', '🤓'),
+                                ('😎', '😎'), ('🤩', '🤩'), ('🥳', '🥳'), ('😏', '😏'),
+                                ('😒', '😒'), ('😞', '😞'), ('😔', '😔'), ('😟', '😟'),
+                                ('😕', '😕'), ('🙁', '🙁'), ('☹️', '☹️'), ('😣', '😣'),
+                                ('😖', '😖'), ('😫', '😫'), ('😩', '😩'), ('🥺', '🥺'),
+                                ('😢', '😢'), ('😭', '😭'), ('😤', '😤'), ('😠', '😠'),
+                                ('😡', '😡'), ('🤬', '🤬'), ('🤯', '🤯'), ('😳', '😳'),
+                                ('🥵', '🥵'), ('🥶', '🥶'), ('😱', '😱'), ('😨', '😨'),
+                                ('😰', '😰'), ('😥', '😥'), ('😓', '😓'), ('🤗', '🤗'),
+                                ('🤔', '🤔'), ('🤭', '🤭'), ('🤫', '🤫'), ('🤥', '🤥'),
+                                ('😶', '😶'), ('😐', '😐'), ('😑', '😑'), ('😬', '😬'),
+                                ('🙄', '🙄'), ('😯', '😯'), ('😦', '😦'), ('😧', '😧'),
+                                ('😮', '😮'), ('😲', '😲'), ('🥱', '🥱'), ('😴', '😴'),
+                                ('🤤', '🤤'), ('😪', '😪'), ('😵', '😵'), ('🤐', '🤐'),
+                                ('🥴', '🥴'), ('🤢', '🤢'), ('🤮', '🤮'), ('🤧', '🤧'),
+                                ('😷', '😷'), ('🤒', '🤒'), ('🤕', '🤕'), ('🤑', '🤑'),
+                                ('🤠', '🤠'), ('😈', '😈'), ('👿', '👿'), ('👹', '👹'),
+                                ('👺', '👺'), ('🤡', '🤡'), ('💩', '💩'), ('👻', '👻'),
+                                ('💀', '💀'), ('☠️', '☠️'), ('👽', '👽'), ('👾', '👾'),
+                                ('🤖', '🤖'), ('🎃', '🎃'), ('😺', '😺'), ('😸', '😸'),
+                                ('😹', '😹'), ('😻', '😻'), ('😼', '😼'), ('😽', '😽'),
+                                ('🙀', '🙀'), ('😿', '😿'), ('😾', '😾'), ('👶', '👶'),
+                                ('👦', '👦'), ('👧', '👧'), ('👨', '👨'), ('👩', '👩'),
+                                ('👴', '👴'), ('👵', '👵'), ('👮', '👮'), ('🕵️', '🕵️'),
+                                ('🤚', '🤚'), ('🖐', '🖐'), ('✋', '✋'), ('🖖', '🖖'), 
+                                ('👌', '👌'), ('🤏', '🤏'), ('✌️', '✌️'), ('🤞', '🤞'),
+                                 ('🤟', '🤟'), ('🤘', '🤘'), ('🤙', '🤙'), ('👈', '👈'), 
+                                 ('👉', '👉'), ('👆', '👆'), ('🖕', '🖕'), ('👇', '👇'), 
+                                 ('☝️', '☝️'), ('👍', '👍'), ('👎', '👎'), ('✊', '✊'), 
+                                 ('🤛', '🤛'), ('🤜', '🤜'), ('👏', '👏'), ('🙌', '🙌'),
+                                ('👐', '👐'), ('🤲', '🤲'), ('🤝', '🤝'), ('🙏', '🙏'), 
+                                ('✍️', '✍️'), ('💅', '💅'), ('🤳', '🤳'), ('💪', '💪'), 
+                                ('🦾', '🦾'), ('🦿', '🦿'), ('🦵', '🦵'), ('🦶', '🦶'), 
+                                ('👂', '👂'), ('🦻', '🦻'), ('👃', '👃'), ('🧠', '🧠'), 
+                                ('🦴', '🦴'), ('👀', '👀'), ('👁', '👁'), ('👄', '👄')
+                            ] %}
+                            <div class="col-1 p-1">
+                                <span class="emoji-option d-flex justify-content-center align-items-center border rounded bg-light" 
+                                      data-emoji="{{ emoji_char }}" 
+                                      style="cursor: pointer; font-size: 1.2em; height: 30px;">{{ emoji_char }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    </div>
+                    
+                    <!-- 发表评论按钮 -->
+                    <div class="d-flex align-items-start">
+                        {{ form.submit(class="btn btn-primary", value="发表评论") }}
+                    </div>
+                </div>    
+            </div>
+        </form>
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 表情包选择器功能
+            const emojiToggleBtn = document.getElementById('emoji-toggle-btn');
+            const emojiSelectorPopup = document.getElementById('emoji-selector-popup');
+            const contentTextarea = document.getElementById('content');
+            
+            // 切换表情包选择器显示/隐藏
+            emojiToggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation(); // 阻止事件冒泡
+                const isVisible = emojiSelectorPopup.style.display !== 'none';
+                
+                if (isVisible) {
+                    emojiSelectorPopup.style.display = 'none';
+                } else {
+                    // 计算弹出框位置，使其出现在按钮右边
+                    const btnRect = emojiToggleBtn.getBoundingClientRect();
+                    const containerRect = emojiToggleBtn.parentElement.getBoundingClientRect();
+                    
+                    emojiSelectorPopup.style.display = 'block';
+                    // 修正弹出框位置：显示在按钮右边
+                    emojiSelectorPopup.style.top = (btnRect.top - containerRect.top) + 'px';
+                    emojiSelectorPopup.style.left = (btnRect.right - containerRect.left + 5) + 'px';
+                }
+            });
+            
+            // 点击表情符号添加到文本框
+            const emojiOptions = document.querySelectorAll('.emoji-option');
+            emojiOptions.forEach(emoji => {
+                emoji.addEventListener('click', function() {
+                    const selectedEmoji = this.getAttribute('data-emoji');
+                    contentTextarea.value += selectedEmoji;
+                    contentTextarea.focus();
+                    
+                    // 添加后隐藏弹出框
+                    emojiSelectorPopup.style.display = 'none';
+                });
+            });
+            
+            // 点击页面其他地方隐藏表情包选择器
+            document.addEventListener('click', function(e) {
+                if (!emojiSelectorPopup.contains(e.target) && e.target !== emojiToggleBtn) {
+                    emojiSelectorPopup.style.display = 'none';
+                }
+            });
+        });
+        </script>
+        {% else %}
+        <p class="text-muted">
+            请 <a href="{{ url_for('bp_blog.login') }}">登录</a> 后发表评论
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="author-card card mt-4">
+    <div class="card-body">
+        <h5 class="card-title">关于作者</h5>
+        <p class="card-text">{{ author.nickname if author and author.nickname else (author.username if author else '未知作者') }}</p>
+    </div>
+</div>
+{% endblock %}

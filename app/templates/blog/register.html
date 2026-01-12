@@ -1,0 +1,72 @@
+{% extends 'blog/base.html' %}
+{% block style %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/login.css') }}" media="all">
+{% endblock %}
+{% block main %}
+    {{ super() }}
+    <div class="main-body">
+        <div class="login-main">
+            <div class="login-top">
+                <span>用户注册</span>
+                <span class="bg1"></span>
+                <span class="bg2"></span>
+            </div>
+            <!-- 修改表单提交地址为正确的路由 -->
+            <form class="layui-form login-bottom" action="{{ url_for('bp_blog.blog_register') }}" method="post" name="register">
+                {{ register_form.csrf_token }}
+                <div class="center">
+                    <div class="item">
+                        <span class="icon icon-2"></span>
+                        {{ register_form.username(class="layui-input",placeholder="请输入用户名",maxlength="64") }}
+                        {% for error in register_form.username.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="item">
+                        <span class="icon icon-2"></span>
+                        {{ register_form.nickname(class="layui-input",placeholder="请输入用户昵称",maxlength="64") }}
+                        {% for error in register_form.nickname.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="item">
+                        <span class="icon icon-3"></span>
+                        {{ register_form.password(class="layui-input",placeholder="请输入密码",maxlength="16") }}
+                        <span class="bind-password icon icon-4"></span>
+                        {% for error in register_form.password.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="item">
+                        <span class="icon icon-3"></span>
+                        {{ register_form.confirm_password(class="layui-input",placeholder="请确认密码",maxlength="16") }}
+                        <span class="bind-password icon icon-4"></span>
+                        {% for error in register_form.confirm_password.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="item">
+                        <span class="icon icon-2"></span>
+                        {{ register_form.email(class="layui-input",placeholder="请输入邮箱地址",maxlength="128") }}
+                        {% for error in register_form.email.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="layui-form-item" style="text-align:center; width:100%;height:100%;margin:0px;">
+                    <button type="submit" class="login-btn">立即注册</button>
+                </div>
+            </form>
+            
+            <div class="tip" style="text-align: center; margin-top: 20px;">
+                <span>已有账户？</span>
+                <a href="{{ url_for('bp_blog.login') }}" class="forget-password">立即登录</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

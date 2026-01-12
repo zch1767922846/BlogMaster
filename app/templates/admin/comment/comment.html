@@ -1,0 +1,130 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+    <div class="layui-fluid">
+        <div class="layui-row">
+            <table class="layui-hide" id="comments-table" lay-filter="filter-comment-table"></table>
+        </div>
+    </div>
+
+{% endblock %}
+{% block script %}
+    {{ super() }}
+    {# 工具栏#}
+    <script type="text/html" id="toolbar-comments">
+        <div class="layui-btn-container">
+        </div>
+    </script>
+
+    {# 单元格工具#}
+    <script type="text/html" id="toolbar-comment">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+
+    <script>
+    layui.use(['table', 'layer'], function () {
+        var table = layui.table;
+        var layer = layui.layer;
+
+        // 渲染评论表格
+        table.render({
+            elem: "#comments-table",
+            url: "/admin/comments", // 数据接口
+            method: "get",
+            cols: [[
+                {field: "id", title: "ID", width: '8%', sort: true},
+                {field: "post_title", title: "文章标题", width: '20%'},
+                {field: "author", title: "评论作者", width: '15%'},
+                {field: "content", title: "评论内容", width: '30%'},
+                {field: "date", title: "评论时间", width: '15%'},
+                {
+                    field: "status",
+                    title: "状态",
+                    width: '7%',
+                    templet: function(d) {
+                        return d.status ? '<span style="color: green;">已审核</span>' : '<span style="color: red;">待审核</span>';
+                    }
+                },
+                {field: 'operation', title: '操作', toolbar: '#toolbar-comment', width: '12%'}
+            ]],
+            even: true,   // 隔行换色
+            page: true,   // 开启分页
+            limits: [30, 50],
+            limit: 30,
+            parseData: function (res) {
+                // 错误处理
+                if (res.code !== 20000000) {
+                    layer.msg('查询失败: ' + (res.message || '未知错误'), {icon: 5});
+                    return {
+                        code: 0,
+                        msg: '',
+                        count: 0,
+                        data: []
+                    };
+                }
+                return {
+                    code: res.code,
+                    msg: res.message,
+                    count: res.count || 0,
+                    data: res.data || []
+                };
+            },
+            response: {
+                statusCode: 20000000,  // 成功状态码（与后端一致）
+                msgName: "message",
+                dataName: "data"
+            },
+            done: function(res, curr, count) {
+                // 加载完成后的错误检查
+                if (res.code !== 20000000) {
+                    layer.msg('数据加载失败，请刷新页面重试', {icon: 5});
+                }
+            }
+        });
+
+        // 监听行工具事件（编辑/删除）
+        table.on('tool(filter-comment-table)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'del') {
+                layer.confirm('确定删除该评论？', function (index) {
+                    $.ajax({
+                        url: '/admin/comment/' + data.id,
+                        method: 'DELETE',
+                        dataType: 'JSON',
+                        success: function (result) {
+                            if (result.code === 20000000) {  // 删除成功状态码
+                                obj.del();
+                                layer.close(index);
+                                layer.msg(result.message, {icon: 6});
+                            } else {
+                                layer.msg(result.message || '删除失败', {icon: 5});
+                            }
+                        },
+                        error: function(xhr) {
+                            layer.msg('删除失败: ' + (xhr.responseJSON?.message || xhr.statusText), {icon: 5});
+                        }
+                    });
+                });
+            } else if (obj.event === 'edit') {
+                layer.open({
+                    type: 2,
+                    title: ['编辑评论', 'font-size:1.125rem;'],
+                    skin: 'layui-layer-molv',
+                    area: ['50%', '70%'],
+                    content: '/admin/comment/' + data.id + '/edit',
+                    closeBtn: 1,
+                    shade: 0.2,
+                    resize: false,
+                    end: function() {
+                        table.reload('comments-table');
+                    }
+                });
+            }
+        });
+
+
+    });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,63 @@
+<div class="sidebar">
+    <h3 class="sidebar-title">博客分类</h3>
+    <ul class="sidebar-menu">
+        {% for category in categories %}
+        <li>
+            <a href="{{ url_for('bp_blog.posts_by_category', category_id=category.id) }}">
+                <i class="fa fa-folder"></i>
+                {{ category.name }} <span class="badge bg-secondary float-end">{{ category.post_count or 0 }}</span>
+            </a>
+        </li>
+        {% else %}
+        <li class="text-muted">暂无分类</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="sidebar">
+    <h3 class="sidebar-title">热门标签</h3>
+    <div class="tag-cloud">
+        {% for tag in tags %}
+        <a href="{{ url_for('bp_blog.tag_posts', tag_id=tag.id) }}">
+            {{ tag.name }}
+        </a>
+        {% else %}
+        <p class="text-muted">暂无标签</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="sidebar">
+    <h3 class="sidebar-title">快速链接</h3>
+    <ul class="sidebar-menu">
+        <li>
+            <a href="{{ url_for('bp_blog.create_post') }}">
+                <i class="fa fa-pencil-square-o" aria-hidden="true"></i> 发布新文章
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('bp_blog.drafts') }}">
+                <i class="fa fa-file-text-o" aria-hidden="true"></i> 我的草稿
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('bp_blog.user_home') }}">
+                <i class="fa fa-user" aria-hidden="true"></i> 我的主页
+            </a>
+        </li>
+        {% if current_user.is_authenticated %}
+        <li>
+            <a href="{{ url_for('bp_blog.user_favorites') }}">
+                <i class="fa fa-heart" aria-hidden="true"></i> 我的收藏
+            </a>
+        </li>
+        {% endif %}
+        {% if current_user.is_admin_user %}
+        <li>
+            <a href="{{ url_for('bp_admin.index') }}">
+                <i class="fa fa-cog" aria-hidden="true"></i> 管理后台
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</div>

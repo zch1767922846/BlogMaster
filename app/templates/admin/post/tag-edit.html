@@ -1,0 +1,69 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-lg12">
+                <div class="layui-card">
+                    <div class="layui-card-header">编辑标签</div>
+                    <div class="layui-card-body">
+                        <form class="layui-form layui-form-pane" id="tag-form" method="post">
+                            {{ form.csrf_token }}
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">标签名称</label>
+                                <div class="layui-input-block">
+                                    {{ form.name(class="layui-input", placeholder="请输入标签名称") }}
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button class="layui-btn" lay-submit="" lay-filter="submit-tag">提交</button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script>
+        layui.use(['form', 'layer'], function() {
+            var form = layui.form;
+            var layer = layui.layer;
+
+            // 渲染表单
+            form.render();
+
+            // 监听提交
+            form.on('submit(submit-tag)', function(data) {
+                $.ajax({
+                    url: '/admin/tag/{{ tag_id }}',  // 编辑接口路径
+                    type: 'POST',
+                    dataType: 'json',
+                    data: data.field,
+                    success: function(res) {
+                        if (res.code === 20000000) {
+                            layer.msg('标签编辑成功', {icon: 6}, function() {
+                                // 关闭弹窗并刷新父页面
+                                var index = parent.layer.getFrameIndex(window.name);
+                                parent.layer.close(index);
+                                parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(res.message, {icon: 5});
+                        }
+                    },
+                    error: function(xhr) {
+                        layer.msg('请求失败: ' + xhr.responseText, {icon: 5});
+                    }
+                });
+                return false; // 阻止表单默认提交
+            });
+        });
+    </script>
+{% endblock %}

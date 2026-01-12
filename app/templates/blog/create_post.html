@@ -1,0 +1,118 @@
+{% extends 'blog/base_with_nav.html' %}
+
+{% block title %}发布文章 - 我的博客{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>{% if is_edit %}编辑草稿{% else %}发布新文章{% endif %}</h2>
+    </div>
+    <div class="card-body">
+        <form method="post" id="post-form" enctype="multipart/form-data">
+            {{ form.csrf_token }}
+            
+            <div class="mb-3">
+                <label for="title" class="form-label">文章标题</label>
+                {{ form.title(class="form-control", id="title", placeholder="请输入文章标题") }}
+                {% if form.title.errors %}
+                    <div class="text-danger">{{ form.title.errors[0] }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="slug" class="form-label">文章别名</label>
+                {{ form.slug(class="form-control", id="slug", placeholder="请输入文章别名，留空则自动根据标题生成") }}
+                {% if form.slug.errors %}
+                    <div class="text-danger">{{ form.slug.errors[0] }}</div>
+                {% endif %}
+                <div class="form-text">用于生成文章的永久链接，只能包含字母、数字、连字符和下划线</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="categoryid" class="form-label">文章分类</label>
+                {{ form.categoryid(class="form-select", id="categoryid") }}
+                {% if form.categoryid.errors %}
+                    <div class="text-danger">{{ form.categoryid.errors[0] }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">文章标签</label>
+                <div class="form-check">
+                    {% for tag in tags %}
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="tag_ids" 
+                               id="tag-{{ tag.id }}" value="{{ tag.id }}"
+                               {% if post_tags and tag.id in post_tags %}checked{% endif %}>
+                        <label class="form-check-label" for="tag-{{ tag.id }}">
+                            {{ tag.name }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="excerpt" class="form-label">文章摘要</label>
+                {{ form.excerpt(class="form-control", id="excerpt", rows="3", placeholder="请输入文章摘要") }}
+                {% if form.excerpt.errors %}
+                    <div class="text-danger">{{ form.excerpt.errors[0] }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="content" class="form-label">文章内容</label>
+                {{ form.content(class="form-control", id="content", rows="5", placeholder="请输入文章内容", style="white-space: pre-wrap;") }}
+                {% if form.content.errors %}
+                    <div class="text-danger">{{ form.content.errors[0] }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="media_files" class="form-label">上传附件（可选）</label>
+                {{ form.media_files(class="form-control", id="media_files", type="file") }}
+                <div class="form-text">支持图片、文档、视频、音频、压缩包等格式</div>
+                {% if form.media_files.errors %}
+                    <div class="text-danger">{{ form.media_files.errors[0] }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary" name="action" value="publish">发布文章</button>
+                <button type="submit" class="btn btn-secondary ms-2" name="action" value="save">保存草稿</button>
+                {% if is_edit %}
+                <a href="{{ url_for('bp_blog.drafts') }}" class="btn btn-outline-danger ms-2">删除</a>
+                {% else %}
+                <a href="{{ url_for('bp_blog.user_home') }}" class="btn btn-outline-danger ms-2">删除</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('post-form');
+    form.addEventListener('submit', function(e) {
+        // 简单验证
+        const title = document.getElementById('title').value;
+        const content = document.getElementById('content').value;
+        
+        if (!title.trim()) {
+            alert('请输入文章标题');
+            e.preventDefault();
+            return false;
+        }
+        
+        if (!content.trim()) {
+            alert('请输入文章内容');
+            e.preventDefault();
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

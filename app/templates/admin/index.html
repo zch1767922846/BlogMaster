@@ -1,0 +1,97 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+    {{ super() }}
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header">
+            <div class="layui-logo layui-hide-xs layui-bg-black"> FlaskCMS 后台管理</div>
+            <!-- 头部区域（可配合layui已有的水平导航） -->
+            <ul class="layui-nav layui-layout-left">
+                <!-- 移动端显示 -->
+                <li class="layui-nav-item layui-show-xs-inline-block layui-hide-sm" lay-header-event="menuLeft">
+                    <i class="layui-icon layui-icon-spread-left"></i>
+                </li>
+            </ul>
+            <ul class="layui-nav layui-layout-right">
+                <li class="layui-nav-item">
+                    <a href="javascript:;">
+                        <img src="//tva1.sinaimg.cn/crop.0.0.118.118.180/5db11ff4gw1e77d3nqrv8j203k03kweg.jpg" class="layui-nav-img">
+                        {{ current_user.username }}
+                    </a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/user/profile">基本资料</a></dd>
+                        <dd><a href="/admin/user/security">安全设置</a></dd>
+                        <!-- 核心修改1：返回首页 - 用JS强制顶层窗口跳转 -->
+                        <dd>
+                            <a href="javascript:void(0);" onclick="jumpToTop('{{ url_for('bp_blog.user_home') }}')">返回首页</a>
+                        </dd>
+                        <!-- 核心修改2：退出登录 - 用JS强制顶层窗口跳转 -->
+                        <dd>
+                            <a href="javascript:void(0);" onclick="jumpToTop('{{ url_for('bp_admin.logout') }}')">退出登录</a>
+                        </dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+
+        <div class="layui-side layui-bg-black">
+            <div class="layui-side-scroll">
+                <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+                <ul class="layui-nav layui-nav-tree" lay-shrink="all" lay-filter="test">
+                    <li class="layui-nav-item">
+                        <a href="/admin/dashboard">仪表盘</a>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">文章</a>
+                        <dl class="layui-nav-child">
+                            <dd><a href="/admin/category/list">分类目录</a></dd>
+                            <dd><a href="/admin/post/list">文章列表</a></dd>
+                            <dd><a href="/admin/post">发布文章</a></dd>
+                            <dd><a href="/admin/tag/list">标签</a></dd>
+                        </dl>
+                    </li>
+
+
+                    <li class="layui-nav-item"><a href="/admin/comment/list">评论</a></li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">用户</a>
+                        <dl class="layui-nav-child">
+                            <dd><a href="/admin/user/list">所有用户</a></dd>
+                            <dd><a href="/admin/user">添加用户</a></dd>
+                        </dl>
+                    </li>
+
+                    <li class="layui-nav-item"><a href="/admin/about">关于</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="layui-body">
+            <!-- 内容主体区域 -->
+            <div style="padding: 15px;">
+                <iframe id="admin-frame" src="/admin/dashboard" frameborder="0" width=100% height=100%></iframe>
+            </div>
+        </div>
+
+        <div class="layui-footer">
+            © ilearnging - FlaskCMS后台管理系统
+        </div>
+    </div>
+
+    <!-- 核心新增：强制顶层窗口跳转的JS -->
+    <script>
+        // 强制在顶层窗口跳转，彻底脱离admin布局框架
+        function jumpToTop(url) {
+            // 方式1：直接替换顶层窗口的URL（最彻底）
+            window.top.location.href = url;
+            // 方式2：如果方式1失效，备用方案（打开新窗口并关闭当前admin窗口）
+            // let newWin = window.open(url, '_top');
+            // window.close();
+        }
+        
+        // 初始化layui组件
+        layui.use('element', function(){
+            var element = layui.element;
+        });
+    </script>
+{% endblock %}
